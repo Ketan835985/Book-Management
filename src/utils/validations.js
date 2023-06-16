@@ -9,7 +9,14 @@ const passwordCheck = (str)=>{
     return true
 }
 
+const ratingRange = (rating)=>{
+    rating = Number(rating)
+    if(rating < 1 || rating > 5) return false
+    return true
+}
+
 module.exports = {
     titleCheck,
-    passwordCheck
+    passwordCheck,
+    ratingRange
 }
