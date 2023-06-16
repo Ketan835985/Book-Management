@@ -45,6 +45,10 @@ const bookSchema = new mongoose.Schema({
         type: Date,
         required: true,
         format: 'YYYY-MM-DD',
+    },
+    reviewsData : {
+        type: Array,
+        default: [],
     }
 }, { timestamps: true });
 

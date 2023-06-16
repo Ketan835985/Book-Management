@@ -2,6 +2,7 @@ const bookModel = require('../models/bookModel');
 const validator = require('validator');
 const { ObjectIdCheck, userCheck, bookCheck } = require('../utils/verification');
 const reviewModel = require('../models/reviewModel');
+const userModel = require('../models/userModel');
 
 
 const createBook = async (req, res) => {
@@ -20,15 +21,16 @@ const createBook = async (req, res) => {
         if (titleBook) {
             return res.status(400).json({ status: false, message: 'Title already exists' });
         }
+        const user = await userModel.findOne({ _id: userId });
+        if (!user) {
+            return res.status(404).json({ status: false, message: 'User does not exist' });
+        }
         else {
             const IsbnBook = await bookModel.findOne({ ISBN: ISBN });
             if (IsbnBook) {
                 return res.status(400).json({ status: false, message: 'ISBN already exists' });
             }
             else {
-                if (!userCheck(userId)) {
-                    return res.status(404).json({ status: false, message: 'User does not exist' });
-                }
                 const book = await bookModel.create(req.body)
                 res.status(201).json({ status: true, data: book });
             }
@@ -60,12 +62,12 @@ const getBooksById = async (req, res) => {
         if (!ObjectIdCheck(bookId)) {
             return res.status(400).json({ status: false, message: 'Book Id is invalid' });
         }
-        if (!bookCheck(bookId)) {
+        const book = await bookModel.findById(bookId)
+        if (!book) {
             return res.status(404).json({ status: false, message: 'Book does not exist' });
         }
-        const book = await bookModel.findById(bookId);
-        const reviewData = await reviewModel.find({ bookId: bookId, isDeleted: false });
-        book.reviewsData = (reviewData) ? reviewData : [];
+        const reviewsData = await reviewModel.find({ bookId: bookId, isDeleted: false });
+        book.reviewsData = reviewsData;
         res.status(200).json({ status: true, data: book });
     } catch (error) {
         res.status(500).json({ status: false, message: error.message });
@@ -75,14 +77,17 @@ const getBooksById = async (req, res) => {
 const updateBook = async (req, res) => {
     try {
         const bookId = req.params.bookId;
+        if (!bookId) {
+            return res.status(404).json({ status: false, message: 'Book Id is required' });
+        }
         if (!ObjectIdCheck(bookId)) {
             return res.status(400).json({ status: false, message: 'Book Id is invalid' });
         }
-        const book = await bookModel.findOne({ _Id: bookId, isDeleted: false });
+        const book = await bookModel.findOne({ _id: bookId, isDeleted: false });
         if (!book) {
             return res.status(404).json({ status: false, message: 'Book does not exist' });
         }
-        if (book.userId !== req.userId) {
+        if (book.userId != req.userId) {
             return res.status(403).json({ status: false, message: 'Access denied' });
         }
         const updateBookData = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, req.body, { new: true });
@@ -103,11 +108,11 @@ const deleteBookById = async (req, res) => {
         if (!ObjectIdCheck(bookId)) {
             return res.status(400).json({ status: false, message: 'Book Id is invalid' });
         }
-        const book = await bookModel.findOne({ _Id: bookId, isDeleted: false });
+        const book = await bookModel.findOne({ _id: bookId, isDeleted: false });
         if (!book) {
             return res.status(404).json({ status: false, message: 'Book does not exist' });
         }
-        if (book.userId !== req.userId) {
+        if (book.userId != req.userId) {
             return res.status(403).json({ status: false, message: 'Access denied' });
         }
         const deleteBook = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { isDeleted: true, deletedAt: new Date() }, { new: true });

@@ -6,7 +6,7 @@ const { SECRET_KEY } = require('../../config');
 const userRegister = async (req, res) => {
     try {
         const { title, name, phone, email, password } = req.body;
-        if (!title || !name || !phone || !email || !password || name.trim() == '' || phone.trim() == '') {
+        if (!title || !name || !phone || !email || !password || name.trim() == '' || email.trim() == '') {
             return res.status(400).json({ status: false, message: 'Please fill all the fields' });
         }
         if (!validator.isEmail(email)) {
@@ -52,8 +52,8 @@ const userLogin = async (req, res) => {
             return res.status(401).json({ status: false, message: 'User not found' });
         }
         const token = jwt.sign({ userId: user._id }, SECRET_KEY);
-        res.setHeaders('x-api-key', token);
-        res.status(200).json({ status: true, message: 'User logged in successfully', data: { token: token } });
+        res.setHeader('x-api-key', token);
+        return res.status(200).json({ status: true, data: { token: token } });
         
     } catch (error) {
         res.status(500).json({ status: false, message: error.message });

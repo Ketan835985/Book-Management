@@ -21,7 +21,7 @@ const createReview = async (req, res) => {
         if (!ObjectIdCheck(bookId)) {
             return res.status(400).json({ status: false, message: "book Id is invalid" })
         }
-        const checkBook = await bookModel.findOne({ id: bookId, isDeleted: false });
+        const checkBook = await bookModel.findOne({_id: bookId, isDeleted: false });
         if (!checkBook) {
             return res.status(404).json({ status: false, message: "book not found" })
         }
