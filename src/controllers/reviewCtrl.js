@@ -73,3 +73,39 @@ const updateReview = async (req, res) => {
         res.status(500).json({ status: false, message: error.message })
     }
 }
+
+const deletedReview = async (req, res) => {
+    try {
+        const reviewId = req.params.reviewId;
+        const bookId = req.params.bookId;
+        if(!reviewId || ! bookId){
+            return res.status(404).json({ status: false, message: "review Id or book Id not found in params" })
+        }
+        if(!ObjectIdCheck(bookId) && !ObjectIdCheck(reviewId)){
+            return res.status(400).json({ status: false, message: "Object Id Is Invalid" });
+        }
+        const book = await bookModel.findOne({ _id: bookId, isDeleted: false });
+        if(!book){
+            return res.status(404).json({ status: false, message: "book not found" })
+        }
+        const review = await reviewModel.findOne({ _id: reviewId, isDeleted: false });
+        if(!review){
+            return res.status(404).json({ status: false, message: "review not found" })
+        }
+        if(bookId !== review.bookId){
+            return res.status(400).json({ status: false, message: "book Id is invalid" })
+        }
+        const bookUpdated = await bookModel.findByIdAndUpdate(bookId, { $inc: { reviews: -1 } }, { new: true });
+        const reviewUpdated = await reviewModel.findByIdAndUpdate(reviewId, { $set: { isDeleted: true } }, { new: true });
+        res.status(200).json({ status: true, message: "Review deleted successfully"});
+    } catch (error) {
+        res.status(500).json({ status: false, message: error.message })
+    }
+}
+
+
+
+module.exports = {
+    createReview,
+    updateReview
+}

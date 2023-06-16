@@ -49,7 +49,7 @@ const userLogin = async (req, res) => {
         }
         const user = await userModel.findOne({ email: email, password: password });
         if (!user) {
-            return res.status(404).json({ status: false, message: 'User not found' });
+            return res.status(401).json({ status: false, message: 'User not found' });
         }
         const token = jwt.sign({ userId: user._id }, SECRET_KEY);
         res.setHeaders('x-api-key', token);
