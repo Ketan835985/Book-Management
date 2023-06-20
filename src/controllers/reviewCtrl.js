@@ -1,7 +1,7 @@
 const bookModel = require('../models/bookModel');
 const reviewModel = require('../models/reviewModel');
 const { ratingRange } = require('../utils/validations');
-const { ObjectIdCheck, bookCheck } = require('../utils/verification')
+const { ObjectIdCheck } = require('../utils/verification')
 
 
 
