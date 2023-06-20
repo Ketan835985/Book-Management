@@ -110,20 +110,20 @@
 ## Review APIs
 ### POST /books/:bookId/review
 - Add a review for the book in reviews collection.
-- Check if the bookId exists and is not deleted before adding the review. Send an error response with appropirate status code like [this](#error-response-structure) if the book does not exist
+- Check if the bookId exists and is not deleted before adding the review. Send an error response with appropriate status code like [this](#error-response-structure) if the book does not exist
 - Get review details like review, rating, reviewer's name in request body.
 - Update the related book document by increasing its review count
 - Return the updated book document with reviews data on successful operation. The response body should be in the form of JSON object like [this](#Review-Response-Structure)
 
 ### PUT /books/:bookId/review/:reviewId
 - Update the review - review, rating, reviewer's name.
-- Check if the bookId exists and is not deleted before updating the review. Check if the review exist before updating the review. Send an error response with appropirate status code like [this](#error-response-structure) if the book does not exist
+- Check if the bookId exists and is not deleted before updating the review. Check if the review exist before updating the review. Send an error response with appropriate status code like [this](#error-response-structure) if the book does not exist
 - Get review details like review, rating, reviewer's name in request body.
 - Return the updated book document with reviews data on successful operation. The response body should be in the form of JSON object like [this](#book-details-response)
 
 ### DELETE /books/:bookId/review/:reviewId
-- Check if the review exist with the reviewId. Check if the book exist with the bookId. Send an error response with appropirate status code like [this](#error-response-structure) if the book or book review does not exist
-- Delete the related reivew.
+- Check if the review exist with the reviewId. Check if the book exist with the bookId. Send an error response with appropriate status code like [this](#error-response-structure) if the book or book review does not exist
+- Delete the related review.
 - Update the books document - decrease review count by one
 
 ### Authentication

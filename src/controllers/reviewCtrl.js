@@ -64,7 +64,7 @@ const updateReview = async (req, res) => {
         if (!review) {
             return res.status(404).json({ status: false, message: "review not found" })
         }
-        if (bookId !== review.bookId) {
+        if (bookId != review.bookId) {
             return res.status(400).json({ status: false, message: "book Id is invalid" })
         }
         const updatedReview = await reviewModel.findByIdAndUpdate(reviewId, req.body, { new: true });
@@ -92,7 +92,7 @@ const deletedReview = async (req, res) => {
         if(!review){
             return res.status(404).json({ status: false, message: "review not found" })
         }
-        if(bookId !== review.bookId){
+        if(bookId != review.bookId){
             return res.status(400).json({ status: false, message: "book Id is invalid" })
         }
         const bookUpdated = await bookModel.findByIdAndUpdate(bookId, { $inc: { reviews: -1 } }, { new: true });
