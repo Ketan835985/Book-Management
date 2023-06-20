@@ -35,7 +35,7 @@ const createReview = async (req, res) => {
             reviewDetails.review = req.body.review
         }
         const review = await reviewModel.create(reviewDetails);
-        const book = await models.Book.findByIdAndUpdate(bookId, { $inc: { reviews: 1 } }, { new: true });
+        const book = await bookModel.findByIdAndUpdate(bookId, { $inc: { reviews: 1 } }, { new: true });
         book.reviewsData = review;
         res.status(201).json({ status: true, message: "Review added successfully", data: book });
     } catch (error) {
@@ -107,5 +107,6 @@ const deletedReview = async (req, res) => {
 
 module.exports = {
     createReview,
-    updateReview
+    updateReview,
+    deletedReview
 }
