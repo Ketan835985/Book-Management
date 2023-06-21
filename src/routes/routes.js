@@ -22,8 +22,8 @@ router.delete('/books/:bookId', authentication, deleteBookById)
 
 // ===================== review routes ====================
 
-router.post('/books/:bookId/review', authentication, createReview)
-router.put('/books/:bookId/review/:reviewId', authentication, updateReview)
-router.delete('/books/:bookId/review/:reviewId', authentication, deletedReview)
+router.post('/books/:bookId/review', createReview)
+router.put('/books/:bookId/review/:reviewId', updateReview)
+router.delete('/books/:bookId/review/:reviewId', deletedReview)
 
 module.exports = router
