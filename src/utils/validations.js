@@ -10,7 +10,7 @@ const passwordCheck = (str)=>{
 }
 
 const ratingRange = (rating)=>{
-    rating = Number(rating)
+    rating = JSON.stringify(Number(rating))
     if(rating < 1 || rating > 5) return false
     return true
 }

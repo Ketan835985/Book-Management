@@ -12,14 +12,14 @@ const createReview = async (req, res) => {
         if (!bookId) {
             return res.status(404).json({ status: false, message: "book Id not found in params" })
         }
+        if (!ObjectIdCheck(bookId)) {
+            return res.status(400).json({ status: false, message: "book Id is invalid" })
+        }
         if (!rating || !reviewedBy) {
             return res.status(400).json({ status: false, message: "details are missing" })
         }
         if (!ratingRange(rating)) {
             return res.status(400).json({ status: false, message: "rating is invalid" })
-        }
-        if (!ObjectIdCheck(bookId)) {
-            return res.status(400).json({ status: false, message: "book Id is invalid" })
         }
         const checkBook = await bookModel.findOne({_id: bookId, isDeleted: false });
         if (!checkBook) {
