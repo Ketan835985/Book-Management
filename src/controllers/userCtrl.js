@@ -51,7 +51,7 @@ const userLogin = async (req, res) => {
         if (!user) {
             return res.status(401).json({ status: false, message: 'User not found' });
         }
-        const token = jwt.sign({ userId: user._id }, SECRET_KEY);
+        const token = jwt.sign({ userId: user._id }, SECRET_KEY, {expiresIn: '1h'});
         res.setHeader('x-api-key', token);
         return res.status(200).json({ status: true, data: { token: token } });
     } catch (error) {

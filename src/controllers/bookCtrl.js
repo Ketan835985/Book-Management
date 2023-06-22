@@ -115,14 +115,14 @@ const deleteBookById = async (req, res) => {
         if (!ObjectIdCheck(bookId)) {
             return res.status(400).json({ status: false, message: 'Book Id is invalid' });
         }
-        const book = await bookModel.findOne({ _id: bookId, isDeleted: false });
-        if (!book) {
-            return res.status(404).json({ status: false, message: 'Book does not exist' });
-        }
+        
         if (book.userId != req.userId) {
             return res.status(403).json({ status: false, message: 'Access denied' });
         }
         const deleteBook = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { isDeleted: true, deletedAt: new Date() }, { new: true });
+        if (!deleteBook) {
+            return res.status(404).json({ status: false, message: 'Book does not exist' });
+        }
         res.status(200).json({ status: true, message: "Delete book Successfully" });
     } catch (error) {
         if (error.name === "ValidationError") {
