@@ -14,9 +14,6 @@ const createBook = async (req, res) => {
         if (!ObjectIdCheck(userId)) {
             return res.status(400).json({ status: false, message: 'User Id is invalid' });
         }
-        if (!validator.isISBN(ISBN)) {
-            return res.status(400).json({ status: false, message: 'ISBN is invalid' });
-        }
         const titleBook = await bookModel.findOne({ title: title });
         if (titleBook) {
             return res.status(400).json({ status: false, message: 'Title already exists' });
@@ -51,7 +48,8 @@ const createBook = async (req, res) => {
 
 const getBooks = async (req, res) => {
     try {
-        const books = await bookModel.find({ ...req.query, isDeleted: false }).sort({ name: 1 });
+        const value = req.query;
+        const books = await bookModel.find({ ...value, isDeleted: false }).sort({ name: 1 });
         if (books.length == 0) {
             return res.status(404).json({ status: false, message: 'No books found' });
         }
