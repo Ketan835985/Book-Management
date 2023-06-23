@@ -52,8 +52,22 @@ const createBook = async (req, res) => {
 
 const getBooks = async (req, res) => {
     try {
-        const value = req.query;
-        const books = await bookModel.find({ ...value, isDeleted: false }).sort({ name: 1 });
+        const {userId , category, subcategory} = req.query;
+
+
+        const books = await bookModel.find({ isDeleted: false }).sort({ name: 1 });
+        if(userId) {
+            books.filter( book => book.userId == userId)
+        }
+        if(category) {
+            books.filter( book => book.category == category)
+        }
+        if(category) {
+            books.filter( book => book.subcategory == subcategory)
+        }
+        if(books.length ==0){
+            return res.status(404).send({ status: false, message: "Book not found"})
+        }
         res.status(200).json({ status: true, message: 'Books list', data: books });
     } catch (error) {
         res.status(500).json({ status: false, message: error.message });
@@ -71,7 +85,7 @@ const getBooksById = async (req, res) => {
         if (!book) {
             return res.status(404).json({ status: false, message: 'Book does not exist' });
         }
-        const reviewsData = await reviewModel.find({ bookId: bookId, isDeleted: false });
+        const reviewsData = await reviewModel.find({ bookId: bookId, isDeleted: false }).select({_id : true, bookId :1, reviewedBy:1, reviewedAt :1, review: 1, rating:1});
         book.reviewsData = reviewsData;
         res.status(200).json({ status: true, data: book });
     } catch (error) {
@@ -138,10 +152,13 @@ const deleteBookById = async (req, res) => {
         const deleteBook = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { isDeleted: true, deletedAt: new Date() }, { new: true });
         res.status(200).json({ status: true, message: "Delete book Successfully" });
     } catch (error) {
-        if (error.name === "ValidationError") {
-            return res.status(400).json({ status: false, message: error.message });
+         if (error.message.includes('validation')) {
+            return res.status(400).send({ status: false, message: error.message })
+        } else if (error.message.includes('duplicate')) {
+            return res.status(400).send({ status: false, message: error.message })
+        } else {
+            res.status(404).json({ status: false, message: error.message })
         }
-        res.status(500).json({ status: false, message: error.message });
     }
 }
 module.exports = {
