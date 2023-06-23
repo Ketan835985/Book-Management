@@ -8,7 +8,7 @@ const { ObjectIdCheck } = require('../utils/verification')
 const createReview = async (req, res) => {
     try {
         const bookId = req.params.bookId
-        const { rating, reviewedAt, reviewedBy } = req.body;
+        const { rating, reviewedBy } = req.body;
         if (!bookId) {
             return res.status(404).json({ status: false, message: "book Id not found in params" })
         }

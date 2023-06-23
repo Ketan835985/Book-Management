@@ -5,7 +5,7 @@ const reviewModel = require('../models/reviewModel');
 const userModel = require('../models/userModel');
 const moment  = require('moment')
 
-
+const dateFormat = 'YYYY-MM-DD'
 const createBook = async (req, res) => {
     try {
         const { title, excerpt, releasedAt, userId, subcategory, category, ISBN } = req.body
@@ -23,7 +23,7 @@ const createBook = async (req, res) => {
         if (!user) {
             return res.status(404).json({ status: false, message: 'User does not exist' });
         }
-        if(! moment(releasedAt, "YYYY-MM-DD").isValid()){
+        if (!releasedAt || !moment(releasedAt, dateFormat, true).isValid()){
             return res.status(400).json({ status: false, message: 'date is invalid' });
         }
         else {
@@ -55,7 +55,7 @@ const getBooks = async (req, res) => {
         const {userId , category, subcategory} = req.query;
 
 
-        const books = await bookModel.find({ isDeleted: false }).sort({ name: 1 });
+        const books = await bookModel.find({userId:userId, category : category, subcategory:subcategory, isDeleted: false }).sort({ name: 1 });
         if(userId) {
             books.filter( book => book.userId == userId)
         }
