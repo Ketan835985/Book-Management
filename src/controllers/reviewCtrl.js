@@ -8,7 +8,7 @@ const { ObjectIdCheck } = require('../utils/verification')
 const createReview = async (req, res) => {
     try {
         const bookId = req.params.bookId
-        const { rating, reviewedBy } = req.body;
+        const { rating, reviewedBy, review } = req.body;
         if (!bookId) {
             return res.status(404).json({ status: false, message: "book Id not found in params" })
         }
@@ -25,22 +25,22 @@ const createReview = async (req, res) => {
         if (!ratingRange(rating)) {
             return res.status(400).json({ status: false, message: "rating is invalid" })
         }
-        
+
 
         const reviewDetails = {
-            rating: rating,
-            bookId: bookId,
+            bookId,
+            reviewedBy,
+            review,
+            rating,
+            reviewedAt: new Date()
         }
-        if (req.body.review) {
-            reviewDetails.review = req.body.review
-        }
-        if (reviewedBy) {
-            reviewDetails.reviewedBy = reviewedBy
-        }
+        checkBook.reviews += 1
+        await checkBook.save()
         const reviewsCreate = await reviewModel.create(reviewDetails);
-        const book = await bookModel.findByIdAndUpdate(bookId, { $inc: { reviews: 1 } }, { new: true });
-        book.reviewsData = reviewsCreate;
-        res.status(201).json({ status: true, message: "Review added successfully", data: book });
+
+        const data = checkBook.toObject()
+        data["reviewsData"] = reviewsCreate
+        res.status(201).json({ status: true, message: "Review added successfully", data: data });
     } catch (error) {
         if (error.message.includes('validation')) {
             return res.status(400).send({ status: false, message: error.message })
@@ -69,14 +69,42 @@ const updateReview = async (req, res) => {
         if (!book) {
             return res.status(404).json({ status: false, message: "book not found" })
         }
-        const review = await reviewModel.findOne({ _id: reviewId, isDeleted: false });
-        if (!review) {
+        const reviewFind = await reviewModel.findOne({ _id: reviewId, bookId: bookId, isDeleted: false });
+        if (!reviewFind || reviewFind == null) {
             return res.status(404).json({ status: false, message: "review not found" })
         }
-        if (bookId != review.bookId) {
-            return res.status(400).json({ status: false, message: "book Id is invalid" })
+
+        const data = book.toObject()
+        data['reviewsData'] = reviewFind
+
+        if (!req.body) {
+            return res.status(400).json({ status: false, message: "details are missing for update" })
         }
-        const updatedReview = await reviewModel.findByIdAndUpdate(reviewId, req.body, { new: true });
+
+        const { review, rating, reviewedBy } = req.body
+        const updateDetail = {}
+        if (review.trim() != '') {
+            if (!Object.prototype.hasOwnProperty.call(updateDetail, '$set')){
+                updateDetail['$set'] = {}
+            }
+            updateDetail['$set']['review'] = review
+        }
+        if (reviewedBy.trim() != '') {
+            if (!Object.prototype.hasOwnProperty.call(updateDetail, '$set')){
+                updateDetail['$set'] = {}
+            }
+            updateDetail['$set']['reviewedBy'] = reviewedBy
+        }
+        if (!rating || !isNaN(Number(rating))){
+            if (!ratingRange(rating)) {
+                return res.status(400).json({ status: false, message: "rating is invalid" })
+            }
+            if (!Object.prototype.hasOwnProperty.call(updateDetail, '$set')){
+                updateDetail['$set'] = {}
+            }
+            updateDetail['$set']['rating'] = rating
+        }
+        const updatedReview = await reviewModel.findByIdAndUpdate(reviewId, updateDetail, { new: true });
         res.status(200).json({ status: true, message: "Review updated successfully", data: updatedReview });
     } catch (error) {
         if (error.message.includes('validation')) {
@@ -100,18 +128,19 @@ const deletedReview = async (req, res) => {
             return res.status(400).json({ status: false, message: "Object Id Is Invalid" });
         }
         const book = await bookModel.findOne({ _id: bookId, isDeleted: false });
-        if (!book || book==null) {
+        if (!book || book == null) {
             return res.status(404).json({ status: false, message: "book not found" })
         }
-        const review = await reviewModel.findOne({ _id: reviewId, isDeleted: false });
-        if (!review|| review==null) {
+        const review = await reviewModel.findOne({ _id: reviewId, bookId: bookId, isDeleted: false });
+        if (!review || review == null) {
             return res.status(404).json({ status: false, message: "review not found" })
         }
         if (bookId != review.bookId) {
             return res.status(400).json({ status: false, message: "book Id is invalid" })
         }
-        const bookUpdated = await bookModel.findOneAndUpdate({_id: bookId, isDeleted: false}, { $inc: { reviews: -1 } }, { new: true });
-        const reviewUpdated = await reviewModel.findOneAndUpdate({_id:reviewId, isDeleted: false}, { $set: { isDeleted: true } }, { new: true });
+        const reviewUpdated = await reviewModel.findOneAndUpdate({ _id: reviewId, isDeleted: false }, { $set: { isDeleted: true } }, { new: true });
+        book.reviews = book.reviews === 0 ? 0 : book.reviews - 1
+        await book.save()
         res.status(200).json({ status: true, message: "Review deleted successfully" });
     } catch (error) {
         if (error.message.includes('validation')) {
