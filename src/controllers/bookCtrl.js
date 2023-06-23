@@ -55,16 +55,7 @@ const getBooks = async (req, res) => {
         const {userId , category, subcategory} = req.query;
 
 
-        const books = await bookModel.find({userId:userId, category : category, subcategory:subcategory, isDeleted: false }).sort({ name: 1 });
-        if(userId) {
-            books.filter( book => book.userId == userId)
-        }
-        if(category) {
-            books.filter( book => book.category == category)
-        }
-        if(category) {
-            books.filter( book => book.subcategory == subcategory)
-        }
+        const books = await bookModel.find({userId:userId, category : category, subcategory:subcategory, isDeleted: false }).sort({ name: 1 }).select({_id:1, title: 1, excerpt: 1, releasedAt: 1, userId:1, category:1, subcategory:1, review : 1});
         if(books.length ==0){
             return res.status(404).send({ status: false, message: "Book not found"})
         }
@@ -74,6 +65,7 @@ const getBooks = async (req, res) => {
     }
 }
 
+//response includes _id, title, excerpt, userId, category, releasedAt and reviews fields
 
 const getBooksById = async (req, res) => {
     try {
@@ -81,7 +73,7 @@ const getBooksById = async (req, res) => {
         if (!ObjectIdCheck(bookId)) {
             return res.status(400).json({ status: false, message: 'Book Id is invalid' });
         }
-        const book = await bookModel.findById(bookId)
+        const book = await bookModel.findOne({_id:bookId, isDeleted: false}).select({_id:1, title: 1, excerpt: 1, releasedAt: 1, userId:1, category:1, review : 1})
         if (!book) {
             return res.status(404).json({ status: false, message: 'Book does not exist' });
         }
