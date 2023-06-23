@@ -152,7 +152,7 @@ const deleteBookById = async (req, res) => {
         const deleteBook = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { isDeleted: true, deletedAt: new Date() }, { new: true });
         res.status(200).json({ status: true, message: "Delete book Successfully" });
     } catch (error) {
-         if (error.message.includes('validation')) {
+        if (error.message.includes('validation')) {
             return res.status(400).send({ status: false, message: error.message })
         } else if (error.message.includes('duplicate')) {
             return res.status(400).send({ status: false, message: error.message })

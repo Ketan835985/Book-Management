@@ -1,12 +1,12 @@
 {
   "name": "book-management",
   "version": "1.0.0",
-  "description": "\"book management system\"",
+  "description": "book management system",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Ketan Gupta",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.1.4",
@@ -14,7 +14,9 @@
     "jsonwebtoken": "^9.0.0",
     "moment": "^2.29.4",
     "mongoose": "^7.3.0",
-    "nodemon": "^2.0.22",
     "validator": "^13.9.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
   }
 }
