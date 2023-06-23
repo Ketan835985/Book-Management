@@ -25,8 +25,6 @@ const createReview = async (req, res) => {
         if (!ratingRange(rating)) {
             return res.status(400).json({ status: false, message: "rating is invalid" })
         }
-
-
         const reviewDetails = {
             bookId,
             reviewedBy,
@@ -62,7 +60,10 @@ const updateReview = async (req, res) => {
         if (!bookId) {
             return res.status(404).json({ status: false, message: "book Id not found in params" })
         }
-        if (!ObjectIdCheck(bookId) && !ObjectIdCheck(reviewId)) {
+        if (!ObjectIdCheck(bookId) ) {
+            return res.status(400).json({ status: false, message: "Object Id Is Invalid" });
+        }
+        if (!ObjectIdCheck(reviewId)) {
             return res.status(400).json({ status: false, message: "Object Id Is Invalid" });
         }
         const book = await bookModel.findOne({ _id: bookId, isDeleted: false }).select({ _id: 1, title: 1, excerpt: 1, releasedAt: 1, userId: 1, category: 1, review: 1 });
@@ -75,7 +76,7 @@ const updateReview = async (req, res) => {
         }
 
         const data = book.toObject()
-        data['reviewsData'] = [reviewFind]
+        data['reviewsData'] = reviewFind
 
         if (!req.body) {
             return res.status(400).json({ status: false, message: "details are missing for update" })
@@ -95,7 +96,7 @@ const updateReview = async (req, res) => {
             }
             updateDetail['$set']['reviewedBy'] = reviewedBy
         }
-        if (!rating || !isNaN(Number(rating))){
+        if (rating){
             if (!ratingRange(rating)) {
                 return res.status(400).json({ status: false, message: "rating is invalid" })
             }
@@ -121,10 +122,13 @@ const deletedReview = async (req, res) => {
     try {
         const reviewId = req.params.reviewId;
         const bookId = req.params.bookId;
-        if (!reviewId || !bookId) {
+        if (!reviewId && !bookId) {
             return res.status(404).json({ status: false, message: "review Id or book Id not found in params" })
         }
-        if (!ObjectIdCheck(bookId) && !ObjectIdCheck(reviewId)) {
+        if (!ObjectIdCheck(bookId) ) {
+            return res.status(400).json({ status: false, message: "Object Id Is Invalid" });
+        }
+        if (!ObjectIdCheck(reviewId)) {
             return res.status(400).json({ status: false, message: "Object Id Is Invalid" });
         }
         const book = await bookModel.findOne({ _id: bookId, isDeleted: false });

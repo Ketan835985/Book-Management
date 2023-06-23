@@ -1,6 +1,6 @@
 const bookModel = require('../models/bookModel');
 const validator = require('validator');
-const { ObjectIdCheck, userCheck, bookCheck } = require('../utils/verification');
+const { ObjectIdCheck } = require('../utils/verification');
 const reviewModel = require('../models/reviewModel');
 const userModel = require('../models/userModel');
 const moment = require('moment')
@@ -33,7 +33,7 @@ const createBook = async (req, res) => {
             }
             else {
                 const book = await bookModel.create(req.body)
-                res.status(201).json({ status: true, data: book });
+                return res.status(201).json({ status: true, data: book });
             }
         }
     } catch (error) {
@@ -53,9 +53,9 @@ const createBook = async (req, res) => {
 const getBooks = async (req, res) => {
     try {
         const frequency = { isDeleted: false }
-        const value = req.query;
-        if (value) {
-            const { userId, category, subcategory } = value;
+        const paramsQuery = req.query;
+        if (paramsQuery) {
+            const { userId, category, subcategory } = paramsQuery;
             if (userId.trim() !== '' && ObjectIdCheck(userId) && userId) {
                 frequency[userId] = userId;
             }
@@ -70,13 +70,12 @@ const getBooks = async (req, res) => {
         if (books.length == 0 && Array.isArray(books)) {
             return res.status(404).send({ status: false, message: "Book not found" })
         }
-        res.status(200).json({ status: true, message: 'Books list', data: books });
+        return res.status(200).json({ status: true, message: 'Books list', data: books });
     } catch (error) {
         res.status(500).json({ status: false, message: error.message });
     }
 }
 
-//response includes _id, title, excerpt, userId, category, releasedAt and reviews fields
 
 const getBooksById = async (req, res) => {
     try {
@@ -91,7 +90,7 @@ const getBooksById = async (req, res) => {
         const reviewsData = await reviewModel.find({ bookId: bookId, isDeleted: false })
         const data = book.toObject();
         data["reviewsData"] = reviewsData;
-        res.status(200).json({ status: true, data: data });
+        return res.status(200).json({ status: true, data: data });
     } catch (error) {
         res.status(500).json({ status: false, message: error.message });
     }
@@ -119,7 +118,7 @@ const updateBook = async (req, res) => {
 
         const { title, excerpt, ISBN, releasedAt } = req.body;
         if (title.trim() != '') {
-            const titleCheck = await bookModel.findOne({ title: title, _id: { $ne: bookId } })
+            const titleCheck = await bookModel.findOne({ title: title })
             if (titleCheck) {
                 return res.status(400).json({ status: false, message: 'duplicate title' })
             }
@@ -130,8 +129,8 @@ const updateBook = async (req, res) => {
             updateBookDetail['$set']['title'] = title
         }
         if (ISBN.trim() != '') {
-            const titleCheck = await bookModel.findOne({ ISBN: ISBN, _id: { $ne: bookId } })
-            if (titleCheck) {
+            const isbnCheck = await bookModel.findOne({ ISBN: ISBN })
+            if (isbnCheck) {
                 return res.status(400).json({ status: false, message: 'duplicate ISBN' })
             }
             if (!Object.prototype.hasOwnProperty.call(updateBookDetail, '$set')) {
@@ -172,17 +171,16 @@ const deleteBookById = async (req, res) => {
             return res.status(400).json({ status: false, message: 'Book Id is invalid' });
         }
         const book = await bookModel.findOne({ _id: bookId, isDeleted: false });
-        if (book.userId != req.userId) {
-            return res.status(403).json({ status: false, message: 'Access denied' });
-        }
         if (!book) {
             return res.status(404).json({ status: false, message: 'Book does not exist' });
         }
-        if(book.userId.toString() !== req.userId) {
+        if (book.userId.toString() !== req.userId) {
             return res.status(403).json({ status: false, message: 'Access denied' });
         }
-        const deleteBook = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { $set:{ isDeleted: true, deletedAt: new Date() }}, { new: true });
-        res.status(200).json({ status: true, message: "Delete book Successfully" });
+        const deleteBook = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { $set: { isDeleted: true, deletedAt: new Date() } }, { new: true });
+        if (deleteBook) {
+        return res.status(200).json({ status: true, message: "Delete book Successfully" });
+        }
     } catch (error) {
         if (error.message.includes('validation')) {
             return res.status(400).send({ status: false, message: error.message })
