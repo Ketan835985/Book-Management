@@ -22,6 +22,9 @@ const createBook = async (req, res) => {
         if (!user) {
             return res.status(404).json({ status: false, message: 'User does not exist' });
         }
+        if(userId != req.userId){
+            return res.status(401).json({status: false, message: 'Unauthorized'})
+        }
         else {
             const IsbnBook = await bookModel.findOne({ ISBN: ISBN });
             if (IsbnBook) {
