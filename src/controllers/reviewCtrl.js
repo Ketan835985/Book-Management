@@ -113,7 +113,13 @@ const deletedReview = async (req, res) => {
         const reviewUpdated = await reviewModel.findByIdAndUpdate(reviewId, { $set: { isDeleted: true } }, { new: true });
         res.status(200).json({ status: true, message: "Review deleted successfully" });
     } catch (error) {
-        res.status(500).json({ status: false, message: error.message })
+        if (error.message.includes('validation')) {
+            return res.status(400).send({ status: false, message: error.message })
+        } else if (error.message.includes('duplicate')) {
+            return res.status(400).send({ status: false, message: error.message })
+        } else {
+            res.status(500).json({ status: false, message: error.message })
+        }
     }
 }
 
