@@ -65,7 +65,7 @@ const updateReview = async (req, res) => {
         if (!ObjectIdCheck(bookId) && !ObjectIdCheck(reviewId)) {
             return res.status(400).json({ status: false, message: "Object Id Is Invalid" });
         }
-        const book = await bookModel.findOne({ _id: bookId, isDeleted: false });
+        const book = await bookModel.findOne({ _id: bookId, isDeleted: false }).select({ _id: 1, title: 1, excerpt: 1, releasedAt: 1, userId: 1, category: 1, review: 1 });
         if (!book) {
             return res.status(404).json({ status: false, message: "book not found" })
         }
@@ -75,7 +75,7 @@ const updateReview = async (req, res) => {
         }
 
         const data = book.toObject()
-        data['reviewsData'] = reviewFind
+        data['reviewsData'] = [reviewFind]
 
         if (!req.body) {
             return res.status(400).json({ status: false, message: "details are missing for update" })

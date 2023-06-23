@@ -66,8 +66,6 @@ const getBooks = async (req, res) => {
                 frequency[subcategory] = subcategory;
             }
         }
-
-
         const books = await bookModel.find(frequency).sort({ title: 1 }).select({ _id: 1, title: 1, excerpt: 1, releasedAt: 1, userId: 1, category: 1, review: 1 });
         if (books.length == 0 && Array.isArray(books)) {
             return res.status(404).send({ status: false, message: "Book not found" })
@@ -92,7 +90,7 @@ const getBooksById = async (req, res) => {
         }
         const reviewsData = await reviewModel.find({ bookId: bookId, isDeleted: false })
         const data = book.toObject();
-        data.reviewsData = reviewsData;
+        data["reviewsData"] = reviewsData;
         res.status(200).json({ status: true, data: data });
     } catch (error) {
         res.status(500).json({ status: false, message: error.message });
