@@ -13,9 +13,9 @@ const createReview = async (req, res) => {
             return res.status(404).json({ status: false, message: "book Id not found in params" })
         }
         if (!ObjectIdCheck(bookId)) {
-            return res.status(400).json({ status: false, message: "book Id is invalid" })
+            return res.status(404).json({ status: false, message: "book Id is invalid" })
         }
-        if (!rating || !reviewedAt) {
+        if (!rating) {
             return res.status(400).json({ status: false, message: "details are missing" })
         }
         if (!ratingRange(rating)) {
@@ -29,7 +29,6 @@ const createReview = async (req, res) => {
         const reviewDetails = {
             rating: rating,
             bookId: bookId,
-            reviewedAt: reviewedAt,
         }
         if (req.body.review) {
             reviewDetails.review = req.body.review

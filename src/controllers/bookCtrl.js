@@ -3,6 +3,7 @@ const validator = require('validator');
 const { ObjectIdCheck, userCheck, bookCheck } = require('../utils/verification');
 const reviewModel = require('../models/reviewModel');
 const userModel = require('../models/userModel');
+const moment  = require('moment')
 
 
 const createBook = async (req, res) => {
@@ -22,8 +23,8 @@ const createBook = async (req, res) => {
         if (!user) {
             return res.status(404).json({ status: false, message: 'User does not exist' });
         }
-        if(userId != req.userId){
-            return res.status(401).json({status: false, message: 'Unauthorized'})
+        if(! moment(releasedAt, "YYYY-MM-DD").isValid()){
+            return res.status(400).json({ status: false, message: 'date is invalid' });
         }
         else {
             const IsbnBook = await bookModel.findOne({ ISBN: ISBN });
@@ -53,9 +54,6 @@ const getBooks = async (req, res) => {
     try {
         const value = req.query;
         const books = await bookModel.find({ ...value, isDeleted: false }).sort({ name: 1 });
-        if (books.length == 0) {
-            return res.status(404).json({ status: false, message: 'No books found' });
-        }
         res.status(200).json({ status: true, message: 'Books list', data: books });
     } catch (error) {
         res.status(500).json({ status: false, message: error.message });
@@ -97,9 +95,20 @@ const updateBook = async (req, res) => {
         if (book.userId != req.userId) {
             return res.status(403).json({ status: false, message: 'Access denied' });
         }
+        if(req.body.title){
+            const titleCheck = await bookModel.findOne({title : req.body.title})
+            if(titleCheck){
+                return res.status(400).json({ status: false, message: 'duplicate title'})
+            }
+        }
+        if(req.body.ISBN){
+            const ISBNCheck = await bookModel.findOne({ISBN : req.body.ISBN})
+            if(ISBNCheck){
+                return res.status(400).json({ status: false, message: 'duplicate title'})
+            }
+        }
         const updateBookData = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, req.body, { new: true });
         res.status(200).json({ status: true, message: "Update book Success", data: updateBookData });
-
     } catch (error) {
         if (error.message.includes('validation')) {
             return res.status(400).send({ status: false, message: error.message })
@@ -119,17 +128,14 @@ const deleteBookById = async (req, res) => {
             return res.status(400).json({ status: false, message: 'Book Id is invalid' });
         }
         
+        const book = await bookModel.findOne({ _id: bookId, isDeleted: false });
         if (book.userId != req.userId) {
             return res.status(403).json({ status: false, message: 'Access denied' });
         }
-        const book = await bookModel.findOne({ _id: bookId, isDeleted: false });
         if (!book) {
             return res.status(404).json({ status: false, message: 'Book does not exist' });
         }
         const deleteBook = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { isDeleted: true, deletedAt: new Date() }, { new: true });
-        if (!deleteBook) {
-            return res.status(404).json({ status: false, message: 'Book does not exist' });
-        }
         res.status(200).json({ status: true, message: "Delete book Successfully" });
     } catch (error) {
         if (error.name === "ValidationError") {

@@ -9,19 +9,19 @@ const ObjectIdCheck = (Id) => {
 }
 
 const userCheck = async(ID) => {
-    const user = await userModel.findById(ID);
+    const user = await userModel.findOne({_id : ID, status: false});
     if(user) return true
     return false
 }
 
 const bookCheck = async(ID) => {
-    const book = await bookModel.findById(ID);
+    const book = await bookModel.findOne({_id : ID, status: false});
     if(book) return true
     return false
 }
 
 const reviewsCheck = async(ID) => {
-    const book = await reviewModel.findById(ID);
+    const book = await reviewModel.findOne({_id : ID, status: false});
     if(book) return true
     return false
 }
