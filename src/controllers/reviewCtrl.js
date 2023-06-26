@@ -66,7 +66,7 @@ const updateReview = async (req, res) => {
         if (!ObjectIdCheck(reviewId)) {
             return res.status(400).json({ status: false, message: "Object Id Is Invalid" });
         }
-        const book = await bookModel.findOne({ _id: bookId, isDeleted: false }).select({ _id: 1, title: 1, excerpt: 1, releasedAt: 1, userId: 1, category: 1, review: 1 });
+        const book = await bookModel.findOne({ _id: bookId, isDeleted: false });
         if (!book) {
             return res.status(404).json({ status: false, message: "book not found" })
         }
