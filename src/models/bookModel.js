@@ -44,6 +44,9 @@ const bookSchema = new mongoose.Schema({
         type: Date,
         required: true,
         format: 'YYYY-MM-DD',
+    },
+    bookCover :{
+        type: String,
     }
 }, { timestamps: true });
 

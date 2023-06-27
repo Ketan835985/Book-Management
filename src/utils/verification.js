@@ -2,9 +2,10 @@ const mongoose = require('mongoose');
 const userModel = require('../models/userModel');
 const bookModel = require('../models/bookModel');
 const reviewModel = require('../models/reviewModel');
+// const validator = require('validator')
 
 const ObjectIdCheck = (Id) => {
-    if (mongoose.Schema.Types.ObjectId.isValid(Id)) return true
+    if (mongoose.Types.ObjectId.isValid(Id)) return true
     return false
 }
 

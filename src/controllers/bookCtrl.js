@@ -4,6 +4,7 @@ const { ObjectIdCheck } = require('../utils/verification');
 const reviewModel = require('../models/reviewModel');
 const userModel = require('../models/userModel');
 const moment = require('moment')
+const uploadFile = require('../aws/aws');
 
 const dateFormat = 'YYYY-MM-DD'
 const createBook = async (req, res) => {
@@ -26,13 +27,25 @@ const createBook = async (req, res) => {
         if (!releasedAt || !moment(releasedAt, dateFormat, true).isValid()) {
             return res.status(400).json({ status: false, message: 'date is invalid' });
         }
+        
         else {
             const IsbnBook = await bookModel.findOne({ ISBN: ISBN });
             if (IsbnBook) {
                 return res.status(400).json({ status: false, message: 'ISBN already exists' });
             }
             else {
-                const book = await bookModel.create(req.body)
+                
+                const bookDetails = {
+                    title: title,
+                    excerpt: excerpt,
+                    userId: userId,
+                    ISBN: ISBN,
+                    category: category,
+                    subcategory: subcategory,
+                    releasedAt: releasedAt,
+                    
+                }
+                const book = await bookModel.create(bookDetails);
                 return res.status(201).json({ status: true, data: book });
             }
         }
@@ -47,6 +60,22 @@ const createBook = async (req, res) => {
     }
 }
 
+const bookCover = async(req, res) => {
+    try {
+        const files = req.files
+        if(!files && files.length==0){
+            return res.status(400).json({ status: false, message: 'No file uploaded' });
+        }
+        const data = await uploadFile(files[0]);
+        res.status(200).json({
+            status: true,
+            data : data
+        })
+    }
+    catch(err){
+        res.status(500).json({ status: false, message: err.message })
+    }
+}
 
 
 
@@ -198,5 +227,6 @@ module.exports = {
     getBooks,
     getBooksById,
     updateBook,
-    deleteBookById
+    deleteBookById,
+    bookCover
 }
